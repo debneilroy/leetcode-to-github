@@ -2,6 +2,8 @@
 
 Automatically downloads all your solved LeetCode problems and publishes them as a live GitHub Pages website with a full LeetCode-style UI — problem descriptions, examples, constraints, hints, and your complete Python solutions.
 
+This tool doesn't host your solutions itself — it creates and pushes to a **separate output repo** (named `leetcode-solutions` by default, configurable via `REPO_NAME` below) that holds your actual problems and serves the live site. Every `leetcode-solutions` mentioned in this README refers to that output repo, not this one.
+
 **Live site:** `https://<your-username>.github.io/leetcode-solutions/` (available after enabling GitHub Pages)
 
 ---
