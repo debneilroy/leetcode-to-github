@@ -88,6 +88,23 @@ Your site goes live at `https://<your-username>.github.io/leetcode-solutions/` i
 
 ---
 
+## Adding problems that aren't on LeetCode
+
+Company interview questions or other non-LeetCode problems won't show up via the scraper, but you can still get them onto the site and into the repo README.
+
+Add a folder under `unknown/`, following the same shape as a scraped problem:
+
+```
+unknown/
+  My-Problem-Name/
+    README.md      ← first line must be "# N. Title" (N = any number you choose)
+    solution.py
+```
+
+Every sync copies `unknown/` into `output/Unknown/` before the site is generated, so these problems get their own `index.html`, a badge/filter on the root site, and a "❓ Unknown" section in the repo README — all regenerated safely alongside the scraped ones, since `unknown/` (unlike gitignored `output/`) is committed to this repo.
+
+---
+
 ## Troubleshooting
 
 **`401 Unauthorized` from GitHub** — Token expired. Delete `~/.leetcode_sync` and re-run `sync.command` to enter a new one.
@@ -110,6 +127,7 @@ leetcode_to_github/
   github_uploader.py   ← uploads only changed files to GitHub
   config.py            ← auto-generated, cleared after each run
   output/              ← downloaded problems + generated site
+  unknown/             ← manually-authored, non-LeetCode problems (committed)
 ```
 
 Each file has a single responsibility so the pipeline stays easy to debug and extend:
@@ -122,3 +140,4 @@ Each file has a single responsibility so the pipeline stays easy to debug and ex
 - **`github_uploader.py`** owns all GitHub API communication. Contains the blob SHA diffing logic so only changed files are pushed.
 - **`config.py`** is intentionally gitignored — it's written just before each sync and wiped immediately after, so credentials are never committed.
 - **`output/`** is gitignored — it's local working storage. The uploader pushes its contents to the `leetcode-solutions` repo, not this one.
+- **`unknown/`** is committed (unlike `output/`) since it's the source of truth for problems the scraper can never find on its own.

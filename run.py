@@ -14,6 +14,7 @@ Usage:
 """
 
 import os
+import shutil
 import sys
 
 # ── Validate config ───────────────────────────────────────────────────────────
@@ -64,6 +65,12 @@ saved, skipped = scrape(
     list_slug=config.LIST_SLUG,
     output_dir=OUTPUT_DIR,
 )
+
+# Step 1b: Copy manually-authored "Unknown" problems (not on LeetCode, so the
+# scraper can't find them) from the git-tracked unknown/ folder into output/
+UNKNOWN_SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "unknown")
+if os.path.isdir(UNKNOWN_SRC):
+    shutil.copytree(UNKNOWN_SRC, os.path.join(OUTPUT_DIR, "Unknown"), dirs_exist_ok=True)
 
 # Step 2: Generate LeetCode-style HTML site
 generate_site(OUTPUT_DIR)

@@ -225,10 +225,10 @@ def build_repo_readme(output_dir: str, repo_url: str) -> str:
         "",
     ]
 
-    counts = {"Easy": 0, "Medium": 0, "Hard": 0}
-    table_rows = {"Easy": [], "Medium": [], "Hard": []}
+    counts = {"Easy": 0, "Medium": 0, "Hard": 0, "Unknown": 0}
+    table_rows = {"Easy": [], "Medium": [], "Hard": [], "Unknown": []}
 
-    for difficulty in ["Easy", "Medium", "Hard"]:
+    for difficulty in ["Easy", "Medium", "Hard", "Unknown"]:
         diff_dir = os.path.join(output_dir, difficulty)
         if not os.path.isdir(diff_dir):
             continue
@@ -242,8 +242,15 @@ def build_repo_readme(output_dir: str, repo_url: str) -> str:
                 num = str(int(m.group(1)))
                 title = m.group(2).replace("-", " ")
             else:
-                num = "?"
-                title = folder
+                # Unnumbered folders (e.g. manually-authored "Unknown" problems)
+                # fall back to the README's "# N. Title" heading line
+                num, title = "?", folder.replace("-", " ")
+                readme_path = os.path.join(folder_path, "README.md")
+                if os.path.isfile(readme_path):
+                    with open(readme_path, "r", encoding="utf-8") as rf:
+                        head_m = re.search(r"^# (\d+)\. (.+)$", rf.read(), re.MULTILINE)
+                    if head_m:
+                        num, title = head_m.group(1), head_m.group(2).strip()
             counts[difficulty] += 1
             table_rows[difficulty].append((num, title, folder))
 
@@ -254,11 +261,12 @@ def build_repo_readme(output_dir: str, repo_url: str) -> str:
         f"| 🟢 Easy    | {counts['Easy']} |",
         f"| 🟡 Medium  | {counts['Medium']} |",
         f"| 🔴 Hard    | {counts['Hard']} |",
+        f"| ❓ Unknown | {counts['Unknown']} |",
         f"| **Total**  | **{total}** |",
         "",
     ]
 
-    for difficulty, emoji in [("Easy", "🟢"), ("Medium", "🟡"), ("Hard", "🔴")]:
+    for difficulty, emoji in [("Easy", "🟢"), ("Medium", "🟡"), ("Hard", "🔴"), ("Unknown", "❓")]:
         rows = table_rows[difficulty]
         if not rows:
             continue

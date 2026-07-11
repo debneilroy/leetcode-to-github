@@ -87,9 +87,10 @@ def uncomment_solution(code: str) -> str:
 # ── Difficulty styling ─────────────────────────────────────────────────────────
 
 DIFF = {
-    "Easy":   {"color": "#2cbb5d", "bg": "rgba(44,187,93,0.15)"},
-    "Medium": {"color": "#ffa116", "bg": "rgba(255,161,22,0.15)"},
-    "Hard":   {"color": "#ef4743", "bg": "rgba(239,71,67,0.15)"},
+    "Easy":    {"color": "#2cbb5d", "bg": "rgba(44,187,93,0.15)"},
+    "Medium":  {"color": "#ffa116", "bg": "rgba(255,161,22,0.15)"},
+    "Hard":    {"color": "#ef4743", "bg": "rgba(239,71,67,0.15)"},
+    "Unknown": {"color": "#8b5cf6", "bg": "rgba(139,92,246,0.15)"},
 }
 
 
@@ -213,6 +214,7 @@ SHARED_CSS = """
   --easy:      #2cbb5d;
   --medium:    #ffa116;
   --hard:      #ef4743;
+  --unknown:   #8b5cf6;
   --radius:    6px;
   --code-bg:   #f5f5f5;
   --code-panel:#f7f8fa;
@@ -273,9 +275,10 @@ sup { font-size: 10px; }
 /* difficulty badge */
 .badge { display: inline-block; padding: 3px 10px; border-radius: 20px;
   font-size: 12px; font-weight: 500; }
-.badge-Easy   { color: var(--easy);   background: rgba(44,187,93,0.15); }
-.badge-Medium { color: var(--medium); background: rgba(255,161,22,0.15); }
-.badge-Hard   { color: var(--hard);   background: rgba(239,71,67,0.15); }
+.badge-Easy    { color: var(--easy);    background: rgba(44,187,93,0.15); }
+.badge-Medium  { color: var(--medium);  background: rgba(255,161,22,0.15); }
+.badge-Hard    { color: var(--hard);    background: rgba(239,71,67,0.15); }
+.badge-Unknown { color: var(--unknown); background: rgba(139,92,246,0.15); }
 
 /* tag */
 .tag { display: inline-block; padding: 3px 10px; border-radius: 20px;
@@ -515,7 +518,7 @@ function toggleTheme() {{
 # ── Index page HTML ────────────────────────────────────────────────────────────
 
 def build_index_page(problems: list) -> str:
-    counts = {"Easy": 0, "Medium": 0, "Hard": 0}
+    counts = {"Easy": 0, "Medium": 0, "Hard": 0, "Unknown": 0}
     for p in problems:
         counts[p.get("difficulty", "Medium")] = counts.get(p.get("difficulty", "Medium"), 0) + 1
     last_updated = datetime.now().strftime("%b %d, %Y at %I:%M %p")
@@ -559,10 +562,11 @@ body {{ padding: 0; }}
 .filter-btn {{ background: var(--surface); border: 1px solid var(--border); color: var(--muted);
   padding: 5px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; }}
 .filter-btn:hover, .filter-btn.active {{ color: var(--text); border-color: var(--muted); background: var(--surface2); }}
-.filter-btn.all.active   {{ color: var(--accent); border-color: var(--accent); }}
-.filter-btn.easy.active  {{ color: var(--easy);   border-color: var(--easy); }}
-.filter-btn.medium.active{{ color: var(--medium); border-color: var(--medium); }}
-.filter-btn.hard.active  {{ color: var(--hard);   border-color: var(--hard); }}
+.filter-btn.all.active     {{ color: var(--accent);  border-color: var(--accent); }}
+.filter-btn.easy.active    {{ color: var(--easy);    border-color: var(--easy); }}
+.filter-btn.medium.active  {{ color: var(--medium);  border-color: var(--medium); }}
+.filter-btn.hard.active    {{ color: var(--hard);    border-color: var(--hard); }}
+.filter-btn.unknown.active {{ color: var(--unknown); border-color: var(--unknown); }}
 
 .table-wrap {{ padding: 0 24px 40px; overflow-x: auto; }}
 table {{ width: 100%; border-collapse: collapse; }}
@@ -608,6 +612,10 @@ tbody td {{ padding: 12px 12px; font-size: 14px; vertical-align: middle; }}
     <div class="stat-label" style="color:var(--hard);">Hard</div>
     <div class="stat-val" style="color:var(--hard);">{counts['Hard']}</div>
   </div>
+  <div class="stat-card">
+    <div class="stat-label" style="color:var(--unknown);">Unknown</div>
+    <div class="stat-val" style="color:var(--unknown);">{counts['Unknown']}</div>
+  </div>
 </div>
 
 <div class="filters">
@@ -615,6 +623,7 @@ tbody td {{ padding: 12px 12px; font-size: 14px; vertical-align: middle; }}
   <button class="filter-btn easy"   onclick="filter('Easy', this)">Easy</button>
   <button class="filter-btn medium" onclick="filter('Medium', this)">Medium</button>
   <button class="filter-btn hard"   onclick="filter('Hard', this)">Hard</button>
+  <button class="filter-btn unknown" onclick="filter('Unknown', this)">Unknown</button>
 </div>
 
 <div class="table-wrap">
@@ -664,7 +673,7 @@ def generate_site(output_dir: str):
 
     # Collect all problems
     problems = []
-    for diff in ["Easy", "Medium", "Hard"]:
+    for diff in ["Easy", "Medium", "Hard", "Unknown"]:
         diff_dir = os.path.join(output_dir, diff)
         if not os.path.isdir(diff_dir):
             continue
