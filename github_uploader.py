@@ -221,6 +221,22 @@ def build_repo_readme(output_dir: str, repo_url: str) -> str:
         "",
         f"> 🌐 [View Live Site](https://debneilroy.github.io/leetcode-solutions/)",
         "",
+        "## Refreshing the live site",
+        "",
+        "This repo is generated, not hand-edited. To pick up new/updated solutions "
+        "or add a non-LeetCode problem:",
+        "",
+        "1. Double-click `sync.command` in the `leetcode_to_github` project "
+        "(make sure you're logged in to leetcode.com in Chrome first)",
+        "2. It re-scrapes your solved list, regenerates this repo's site + README, "
+        "and pushes only the changed files",
+        "3. GitHub Pages picks up the update automatically within ~1 minute at "
+        "the live site link above",
+        "",
+        "For problems not on LeetCode (e.g. company interview questions), add a "
+        "folder under `unknown/` in `leetcode_to_github` before syncing — see "
+        "that repo's README for the format.",
+        "",
         "## Progress",
         "",
     ]
