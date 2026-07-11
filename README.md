@@ -101,7 +101,9 @@ unknown/
     solution.py
 ```
 
-Every sync copies `unknown/` into `output/Unknown/` before the site is generated, so these problems get their own `index.html`, a badge/filter on the root site, and a "❓ Unknown" section in the repo README — all regenerated safely alongside the scraped ones, since `unknown/` (unlike gitignored `output/`) is committed to this repo.
+Every sync copies `unknown/` into `output/Unknown/` before the site is generated, so these problems get their own `index.html`, a badge/filter on the root site, and a "❓ Unknown" section in the repo README — regenerated safely alongside the scraped ones.
+
+`unknown/` is gitignored, same as `output/` — it's local, personal staging, not committed to this tool repo. The permanent record ends up committed in your `leetcode-solutions` repo once synced, same as every scraped problem. (This also means: if you ever start fresh on a new machine, recopy any `unknown/` problems from your `leetcode-solutions` repo's `Unknown/` folder before your first sync there, or they'll fall out of future regenerations.)
 
 ---
 
@@ -127,7 +129,7 @@ leetcode_to_github/
   github_uploader.py   ← uploads only changed files to GitHub
   config.py            ← auto-generated, cleared after each run
   output/              ← downloaded problems + generated site
-  unknown/             ← manually-authored, non-LeetCode problems (committed)
+  unknown/             ← manually-authored, non-LeetCode problems (local only)
 ```
 
 Each file has a single responsibility so the pipeline stays easy to debug and extend:
@@ -140,4 +142,4 @@ Each file has a single responsibility so the pipeline stays easy to debug and ex
 - **`github_uploader.py`** owns all GitHub API communication. Contains the blob SHA diffing logic so only changed files are pushed.
 - **`config.py`** is intentionally gitignored — it's written just before each sync and wiped immediately after, so credentials are never committed.
 - **`output/`** is gitignored — it's local working storage. The uploader pushes its contents to the `leetcode-solutions` repo, not this one.
-- **`unknown/`** is committed (unlike `output/`) since it's the source of truth for problems the scraper can never find on its own.
+- **`unknown/`** is gitignored, same as `output/` — it's per-user local staging for problems the scraper can't find on its own. The permanent record lives in your `leetcode-solutions` repo once synced, not in this tool repo, so cloning this tool never leaks anyone's personal problem content.
