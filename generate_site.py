@@ -523,8 +523,14 @@ def build_index_page(problems: list) -> str:
         counts[p.get("difficulty", "Medium")] = counts.get(p.get("difficulty", "Medium"), 0) + 1
     last_updated = datetime.now().strftime("%b %d, %Y at %I:%M %p")
 
+    def _number_key(p):
+        try:
+            return int(p.get("number", 0))
+        except (TypeError, ValueError):
+            return float("inf")
+
     rows = ""
-    for p in sorted(problems, key=lambda x: int(x.get("number", 0))):
+    for p in sorted(problems, key=_number_key):
         diff = p.get("difficulty", "Medium")
         tags_html = "".join(f'<span class="tag">{html_lib.escape(t)}</span>' for t in p.get("tags", [])[:4])
         rows += f"""
@@ -695,8 +701,15 @@ def generate_site(output_dir: str):
 
     print(f"\n🌐 Generating site for {len(problems)} problems...")
 
-    # Sort by problem number for prev/next navigation
-    problems.sort(key=lambda p: int(p.get("number", 0)))
+    # Sort by problem number for prev/next navigation. Unnumbered "Unknown"
+    # problems (no "# N. Title" heading in their README) sort last.
+    def _number_key(p):
+        try:
+            return int(p.get("number", 0))
+        except (TypeError, ValueError):
+            return float("inf")
+
+    problems.sort(key=_number_key)
 
     # Generate per-problem pages
     for i, p in enumerate(problems):
