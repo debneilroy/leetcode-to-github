@@ -690,7 +690,15 @@ def generate_site(output_dir: str):
             if not os.path.isfile(readme) or not os.path.isfile(solution):
                 continue
             data = parse_readme(readme)
-            data["difficulty"] = diff
+            # "Unknown" is a physical folder for problems not sourced from
+            # LeetCode — it doesn't mean the difficulty is unknown. Trust the
+            # README's own **Difficulty:** line when present; only fall back
+            # to "Unknown" as a difficulty label if the README didn't specify.
+            if diff == "Unknown":
+                if data["difficulty"] not in ("Easy", "Medium", "Hard"):
+                    data["difficulty"] = "Unknown"
+            else:
+                data["difficulty"] = diff
             data["slug"] = f"{diff}/{folder}"
             data["folder"] = folder_path
             problems.append(data)
