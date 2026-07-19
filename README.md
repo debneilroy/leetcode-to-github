@@ -1,6 +1,6 @@
 # LeetCode → GitHub Sync
 
-Automatically downloads all your solved LeetCode problems and publishes them as a live GitHub Pages website with a full LeetCode-style UI — problem descriptions, examples, constraints, hints, and your complete Python solutions.
+Automatically downloads your solved LeetCode problems from a specific LeetCode list (not your entire solved history) and publishes them as a live GitHub Pages website with a full LeetCode-style UI — problem descriptions, examples, constraints, hints, and your complete Python solutions.
 
 This tool doesn't host your solutions itself — it creates and pushes to a **separate output repo** (named `leetcode-solutions` by default, configurable via `REPO_NAME` below) that holds your actual problems and serves the live site. Every `leetcode-solutions` mentioned in this README refers to that output repo, not this one.
 
@@ -10,13 +10,7 @@ This tool doesn't host your solutions itself — it creates and pushes to a **se
 
 ## Why this exists
 
-LeetCode is great for solving problems, but it's a poor long-term home for your work:
-
-- **If LeetCode goes offline or your account is lost, your solutions are gone.** This repo keeps a permanent copy under your control.
-- **LeetCode's submission history is hard to browse.** No search, no filtering by topic, no way to see your solution alongside the problem description.
-- **You can't share your work easily.** A GitHub Pages site gives you a clean, public URL to point to.
-- **No version history.** If you improve a solution, the old one disappears. Git preserves every version.
-- **LeetCode premium problems are only accessible with a subscription.** Once scraped, your local copy of the problem + solution stays with you regardless.
+Mainly: **LeetCode premium problems are only accessible with a subscription.** Once scraped, your local copy of the problem + solution stays with you even if you let the subscription lapse — plus you get a permanent, searchable, shareable copy of your work outside LeetCode.
 
 ---
 
@@ -36,7 +30,7 @@ Make sure you're logged in to [leetcode.com](https://leetcode.com) in Chrome bef
 Each sync is fully incremental — only does what's needed:
 
 1. Reads your LeetCode cookies from Chrome automatically
-2. Fetches your solved problem list from LeetCode
+2. Fetches the solved problems in your configured LeetCode list (see `LIST_SLUG` below) — not every problem you've ever solved on LeetCode
 3. Scrapes any new problems not yet downloaded
 4. Re-checks existing problems — if you resubmitted a better solution, it picks up the new code automatically
 5. Regenerates the site
