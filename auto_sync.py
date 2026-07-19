@@ -85,7 +85,7 @@ def get_leetcode_cookies():
 
 # ── Main sync ─────────────────────────────────────────────────────────────────
 
-def sync():
+def sync(force_refresh: bool = False):
     print("=" * 60)
     print("  LeetCode → GitHub Sync")
     print("=" * 60)
@@ -137,7 +137,10 @@ OUTPUT_DIR       = "output"
     # 4. Run the sync
     print()
     os.chdir(SCRIPT_DIR)
-    result = subprocess.run([sys.executable, "run.py"])
+    env = os.environ.copy()
+    if force_refresh:
+        env["FORCE_REFRESH_README"] = "1"
+    result = subprocess.run([sys.executable, "run.py"], env=env)
 
     # 6. Clear credentials from config.py after upload
     with open(config_path, "w") as f:
@@ -161,9 +164,13 @@ OUTPUT_DIR       = "output"
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Automated LeetCode → GitHub sync")
     parser.add_argument("--setup", action="store_true", help="One-time credential setup")
+    parser.add_argument(
+        "--force-refresh", action="store_true",
+        help="Regenerate every existing README from LeetCode, even if the solution hasn't changed"
+    )
     args = parser.parse_args()
 
     if args.setup:
         setup()
     else:
-        sync()
+        sync(force_refresh=args.force_refresh)

@@ -262,6 +262,8 @@ def html_to_text(html: str) -> str:
     html = re.sub(r"<em>(.*?)</em>", r"*\1*", html, flags=re.DOTALL)
     html = re.sub(r"<code>(.*?)</code>", r"`\1`", html, flags=re.DOTALL)
     html = re.sub(r"<pre>(.*?)</pre>", r"\n```\n\1\n```\n", html, flags=re.DOTALL)
+    html = re.sub(r"<sup>(.*?)</sup>", r"^\1", html, flags=re.DOTALL)
+    html = re.sub(r"<sub>(.*?)</sub>", r"_\1", html, flags=re.DOTALL)
     html = re.sub(r"<[^>]+>", "", html)   # strip remaining tags
     html = re.sub(r"&nbsp;", " ", html)
     html = re.sub(r"&lt;", "<", html)
@@ -398,6 +400,7 @@ def scrape(
     csrf_token: str,
     list_slug: str,
     output_dir: str,
+    force_refresh: bool = False,
 ):
     session = make_session(leetcode_session, csrf_token)
     problems = get_problem_list(session, list_slug)
@@ -452,6 +455,9 @@ def scrape(
         time.sleep(0.8)
 
     # ── Step 2: Check existing problems for updated solutions ─────────────────
+    if force_refresh:
+        print("♻️  --force-refresh: regenerating all existing READMEs regardless of solution changes.\n")
+
     updated = 0
     for i, p in enumerate(existing_problems, 1):
         slug = p["titleSlug"]
@@ -474,11 +480,12 @@ def scrape(
             header_end = existing.find('"""\n\n')
             existing_code = existing[header_end + 5:].strip() if header_end != -1 else existing.strip()
 
-            if code.strip() != existing_code:
+            if force_refresh or code.strip() != existing_code:
                 detail = get_problem_detail(session, slug)
                 save_problem(output_dir, detail, code)
-                print(f"  🔄 Updated: {num}. {title}")
-                saved.append(f"{num}. {title} (updated)")
+                label = "Refreshed" if force_refresh and code.strip() == existing_code else "Updated"
+                print(f"  🔄 {label}: {num}. {title}")
+                saved.append(f"{num}. {title} ({label.lower()})")
                 updated += 1
                 time.sleep(0.8)
             else:

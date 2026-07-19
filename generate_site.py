@@ -118,8 +118,8 @@ def md_to_html(text: str) -> str:
     # italic *...*
     text = re.sub(r"\*(.+?)\*", r"<em>\1</em>", text)
 
-    # superscript  10^4  or  10<sup>4</sup>  (already html) — leave as is
-    text = re.sub(r"(\d+)\^(\d+)", r"\1<sup>\2</sup>", text)
+    # superscript  10^4, n^2  or  10<sup>4</sup>  (already html) — leave as is
+    text = re.sub(r"(\w+)\^(\w+)", r"\1<sup>\2</sup>", text)
 
     # bullet lists
     lines = text.split("\n")

@@ -64,6 +64,7 @@ saved, skipped = scrape(
     csrf_token=config.CSRF_TOKEN,
     list_slug=config.LIST_SLUG,
     output_dir=OUTPUT_DIR,
+    force_refresh=os.environ.get("FORCE_REFRESH_README") == "1",
 )
 
 # Step 1b: Copy manually-authored "Unknown" problems (not on LeetCode, so the
