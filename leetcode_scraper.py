@@ -264,6 +264,7 @@ def html_to_text(html: str) -> str:
     html = re.sub(r"<pre>(.*?)</pre>", r"\n```\n\1\n```\n", html, flags=re.DOTALL)
     html = re.sub(r"<sup>(.*?)</sup>", r"^\1", html, flags=re.DOTALL)
     html = re.sub(r"<sub>(.*?)</sub>", r"_\1", html, flags=re.DOTALL)
+    html = re.sub(r'<a\s+[^>]*href="([^"]*)"[^>]*>(.*?)</a>', r"[\2](\1)", html, flags=re.DOTALL)
     html = re.sub(r"<[^>]+>", "", html)   # strip remaining tags
     html = re.sub(r"&nbsp;", " ", html)
     html = re.sub(r"&lt;", "<", html)

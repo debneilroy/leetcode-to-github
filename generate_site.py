@@ -101,15 +101,38 @@ def md_to_html(text: str) -> str:
     if not text:
         return ""
 
+    # Markdown trigger characters (*, ^, [, ]) that survive inside already-
+    # rendered code/link HTML get hidden behind these tokens so later regex
+    # passes (bold/italic/superscript/bullets) can't reinterpret them.
+    # Restored verbatim at the very end.
+    _ESCAPES = {"*": "\x00AST\x00", "^": "\x00CAR\x00", "[": "\x00LBR\x00", "]": "\x00RBR\x00"}
+
+    def _protect(s: str) -> str:
+        for ch, token in _ESCAPES.items():
+            s = s.replace(ch, token)
+        return s
+
+    def _restore(s: str) -> str:
+        for ch, token in _ESCAPES.items():
+            s = s.replace(token, ch)
+        return s
+
     # fenced code blocks  ```\n...\n```
     text = re.sub(
         r"```\n?(.*?)\n?```",
-        lambda m: f'<pre class="example-block"><code>{html_lib.escape(m.group(1))}</code></pre>',
+        lambda m: f'<pre class="example-block"><code>{_protect(html_lib.escape(m.group(1)))}</code></pre>',
         text, flags=re.DOTALL
     )
 
     # inline code `...`
-    text = re.sub(r"`([^`]+)`", lambda m: f"<code>{html_lib.escape(m.group(1))}</code>", text)
+    text = re.sub(r"`([^`]+)`", lambda m: f"<code>{_protect(html_lib.escape(m.group(1)))}</code>", text)
+
+    # links  [text](url)
+    text = re.sub(
+        r"\[([^\]]+)\]\(([^)]+)\)",
+        lambda m: f'<a href="{html_lib.escape(m.group(2))}" target="_blank">{html_lib.escape(m.group(1))}</a>',
+        text
+    )
 
     # bold ***...*** or **...**
     text = re.sub(r"\*\*\*(.+?)\*\*\*", r"<strong><em>\1</em></strong>", text)
@@ -154,7 +177,7 @@ def md_to_html(text: str) -> str:
             # preserve single newlines as <br> inside paragraphs
             p = p.replace("\n", "<br>")
             result.append(f"<p>{p}</p>")
-    return "\n".join(result)
+    return _restore("\n".join(result))
 
 
 # ── Parse README.md ────────────────────────────────────────────────────────────
