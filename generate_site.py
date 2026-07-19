@@ -542,8 +542,11 @@ function toggleTheme() {{
 
 def build_index_page(problems: list) -> str:
     counts = {"Easy": 0, "Medium": 0, "Hard": 0, "Unknown": 0}
+    not_on_leetcode_count = 0
     for p in problems:
         counts[p.get("difficulty", "Medium")] = counts.get(p.get("difficulty", "Medium"), 0) + 1
+        if p.get("not_on_leetcode"):
+            not_on_leetcode_count += 1
     last_updated = datetime.now().strftime("%b %d, %Y at %I:%M %p")
 
     def _number_key(p):
@@ -555,9 +558,10 @@ def build_index_page(problems: list) -> str:
     rows = ""
     for p in sorted(problems, key=_number_key):
         diff = p.get("difficulty", "Medium")
+        source = "unknown" if p.get("not_on_leetcode") else "leetcode"
         tags_html = "".join(f'<span class="tag">{html_lib.escape(t)}</span>' for t in p.get("tags", [])[:4])
         rows += f"""
-<tr class="prob-row" data-diff="{diff}">
+<tr class="prob-row" data-diff="{diff}" data-source="{source}">
   <td style="color:var(--muted);width:60px;">{p['number']}</td>
   <td><a href="{html_lib.escape(p['slug'])}/index.html">{html_lib.escape(p['title'])}</a></td>
   <td><span class="badge badge-{diff}">{diff}</span></td>
@@ -643,16 +647,16 @@ tbody td {{ padding: 12px 12px; font-size: 14px; vertical-align: middle; }}
   </div>
   <div class="stat-card">
     <div class="stat-label" style="color:var(--unknown);">Unknown</div>
-    <div class="stat-val" style="color:var(--unknown);">{counts['Unknown']}</div>
+    <div class="stat-val" style="color:var(--unknown);">{not_on_leetcode_count}</div>
   </div>
 </div>
 
 <div class="filters">
-  <button class="filter-btn all active" onclick="filter('all', this)">All</button>
-  <button class="filter-btn easy"   onclick="filter('Easy', this)">Easy</button>
-  <button class="filter-btn medium" onclick="filter('Medium', this)">Medium</button>
-  <button class="filter-btn hard"   onclick="filter('Hard', this)">Hard</button>
-  <button class="filter-btn unknown" onclick="filter('Unknown', this)">Unknown</button>
+  <button class="filter-btn all active" onclick="filter('diff', 'all', this)">All</button>
+  <button class="filter-btn easy"   onclick="filter('diff', 'Easy', this)">Easy</button>
+  <button class="filter-btn medium" onclick="filter('diff', 'Medium', this)">Medium</button>
+  <button class="filter-btn hard"   onclick="filter('diff', 'Hard', this)">Hard</button>
+  <button class="filter-btn unknown" onclick="filter('source', 'unknown', this)">Unknown</button>
 </div>
 
 <div class="table-wrap">
@@ -670,11 +674,12 @@ tbody td {{ padding: 12px 12px; font-size: 14px; vertical-align: middle; }}
 </div>
 
 <script>
-function filter(diff, btn) {{
+function filter(type, value, btn) {{
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.querySelectorAll('.prob-row').forEach(r => {{
-    r.style.display = (diff === 'all' || r.dataset.diff === diff) ? '' : 'none';
+    var match = value === 'all' || (type === 'diff' ? r.dataset.diff === value : r.dataset.source === value);
+    r.style.display = match ? '' : 'none';
   }});
 }}
 </script>
@@ -717,6 +722,7 @@ def generate_site(output_dir: str):
             # LeetCode — it doesn't mean the difficulty is unknown. Trust the
             # README's own **Difficulty:** line when present; only fall back
             # to "Unknown" as a difficulty label if the README didn't specify.
+            data["not_on_leetcode"] = (diff == "Unknown")
             if diff == "Unknown":
                 if data["difficulty"] not in ("Easy", "Medium", "Hard"):
                     data["difficulty"] = "Unknown"
